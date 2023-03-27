@@ -1,0 +1,103 @@
+---
+title: "Visualizing CNNs"
+author: "Aleksandra Muciek"
+date: "2023-03-27"
+categories: [ComputerVision, code]
+toc: true
+format: 
+    html: 
+        code-fold: true
+---
+
+
+
+Even though the concept of convolutional neural networks is not new to me, I noticed a gap in my understanding. I couldn't figure out how to approach visualization of convolutional neural network layers' weights. It alweays seemed odd to me when I looked at examples found online. 
+
+Here I will try to explore the concept to teach myself this interesting thing.
+
+## Convolutional neural nets
+
+In convolutional neural networks we operate on images. Each one is 2D grid of values representing every pixel. If the picture is in grayscale we only care for how dark or light each pixel is, so each image is represented as grid $n_{row} \times n_{col}$ with values representing darkness of each pixel.
+
+If we use color pictures, we divide it into $3$ channels - red, green, blue. For image with pixel size $n_{row} \times n_{col}$ we use one grid for red coulour, second for green and third for blue. This means each picture is represented with 3 grids one on top of the other. Dimensionality of this thing is $(n_{row}, n_{col}, 3)$.
+
+![Layers of images. On the left grayscale image represented by only one matrix, on the right 3 channels of a colorful image.](imgaes_layers.png)
+
+### Filters
+
+Filters are introduced to smartly downscale an image while distilling the most important information convayed by the image. If we go back to grayscale setting, and assume we have $(n_{row}, n_{col}, 1)$ image, a single grid with pixel values, we introduce filter, for example $2 \times 2$ matrix that will be put on top of the image, place by place where it fits. Then we will calculate elementwise product of each overlaping entries, sum the values and we will end up with a smaller image.
+
+![Example of grayscale image and $2\times 2$ filter](grayscale_image_and_filter.png)
+
+
+![Applying $2 \times 2$ filter to the example above.](applying_filters.png)
+
+While constructing a concloutional layer in the model, we specify the size of a filter ($2 \times 2$, $3 \times 3$ etc.) and we decide on the number of filters we want to apply. In the example above we used only one filter but we could repeat the above process with the second one with different values than $(1, 0),(2, 4)$. In the example above we got output  with dimensions $(3, 3, 1)$. If we chose to apply second filter we would get second result, so overal thing would have dimensions $(3, 3, 2)$. For specified number of filters $k$ we would get $(3, 3, k)$ dimensional tensor. 
+
+Values of the filters are not specified by us before training - they are learned by the model. These are the things we may want ti visualize later to see how the model behaves.
+
+## Get convolutional model
+
+We get a trained model from `keras` package called VGG16. Out of this model we will look for convolutional layers.
+
+```{python}
+import numpy as np
+
+
+from keras.applications.vgg16 import VGG16
+model = VGG16()
+
+#model.summary()
+
+for idx, layer in enumerate(model.layers):
+    if 'conv' in layer.name:
+        filters, biases = layer.get_weights()
+        print(f"Index: {idx})", layer.name, filters.shape)
+
+#weights from the second layer
+
+filters, biases = model.layers[1].get_weights()
+
+#scaling
+f_min, f_max = filters.min(), filters.max()
+filters = (filters - f_min) / (f_max - f_min)
+```
+
+## Plot some filters
+
+Here are presented some filters.
+
+```{python}
+#| label: fig-bnwfilters
+#| fig-cap: "Every row is a visualized $3 \times 3$ filter with every column being a channel of that filter. "
+import matplotlib.pyplot as plt
+
+num_filters = 4
+
+fig, axs = plt.subplots(num_filters, filters.shape[2], sharey=True, figsize=(8, 12))
+fig.suptitle("Visualization of weights")
+for i in range(num_filters):
+    filter_0 = filters[:,:,:, i]
+    for j in range(filter_0.shape[2]):
+        axs[i,j].imshow(filter_0[:,:, j], cmap='gray')
+```
+
+
+
+```{python}
+
+fig, axs = plt.subplots(5, 5, sharey=True, figsize = (8,8))
+fig.suptitle("Filters with all 3 channels")
+for i in range(5):
+    for j in range(5):
+        axs[i, j].imshow(filters[:,:,:, i*5 + j])
+
+```
+
+## Additional section to play with widgets
+
+```{python}
+
+```
+
+## Useful links 
