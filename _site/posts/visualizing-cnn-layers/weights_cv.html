@@ -173,6 +173,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
                                 <div class="quarto-categories">
                 <div class="quarto-category">ComputerVision</div>
                 <div class="quarto-category">code</div>
+                <div class="quarto-category">python</div>
               </div>
                   </div>
   </div>
@@ -250,8 +251,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p></p><figcaption class="figure-caption">Applying <span class="math inline">\(2 \times 2\)</span> filter to the example above.</figcaption><p></p>
 </figure>
 </div>
-<p>While constructing a concloutional layer in the model, we specify the size of a filter (<span class="math inline">\(2 \times 2\)</span>, <span class="math inline">\(3 \times 3\)</span> etc.) and we decide on the number of filters we want to apply. In the example above we used only one filter but we could repeat the above process with the second one with different values than <span class="math inline">\((1, 0),(2, 4)\)</span>. In the example above we got output with dimensions <span class="math inline">\((3, 3, 1)\)</span>. If we chose to apply second filter we would get second result, so overal thing would have dimensions <span class="math inline">\((3, 3, 2)\)</span>. For specified number of filters <span class="math inline">\(k\)</span> we would get <span class="math inline">\((3, 3, k)\)</span> dimensional tensor.</p>
+<p>While constructing a concloutional layer in the model, we specify the size of a filter (<span class="math inline">\(2 \times 2\)</span>, <span class="math inline">\(3 \times 3\)</span> etc.) and we decide on the number of filters we want to apply. In the example above we used only one filter but we could repeat the above process with the second one with different values than <span class="math inline">\((1, 0),(2, 4)\)</span>. In the example above we got output with dimensions <span class="math inline">\((3, 3, 1, 1)\)</span>. If we chose to apply second filter we would get second result, so overal thing would have dimensions <span class="math inline">\((3, 3, 1, 2)\)</span>. For specified number of filters <span class="math inline">\(k\)</span> we would get <span class="math inline">\((3, 3, 1, k)\)</span> dimensional tensor.</p>
 <p>Values of the filters are not specified by us before training - they are learned by the model. These are the things we may want ti visualize later to see how the model behaves.</p>
+<p>If we take colorful image as input, with size <span class="math inline">\((n_{row}, n_{col}, 3)\)</span>, we construct filters that also have <span class="math inline">\(3\)</span> channels - for example with size <span class="math inline">\((2, 2, 3)\)</span>. Each of the channels of the filter will be applied to the corresponding channel of a picture, the elementwise product will be calculated for each channel separately, as above. Then, before putting it all to the result matrix, the values will be summed together. We then would get flat <span class="math inline">\((n_{row}', n_{col}', 1)\)</span> output. As before, we are not only applying one filter on the image - we can to this with many filters (<span class="math inline">\(k\)</span>), so all of them will be stored as, for example <span class="math inline">\((2, 2, 3, k)\)</span>. And we will get output for each filter, so overal size will be <span class="math inline">\((n_{row}', n_{col}', k)\)</span></p>
 </section>
 </section>
 <section id="get-convolutional-model" class="level2">
@@ -272,35 +274,51 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">'conv'</span> <span class="kw">in</span> layer.name:</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        filters, biases <span class="op">=</span> layer.get_weights()</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Index: </span><span class="sc">{</span>idx<span class="sc">}</span><span class="ss">)"</span>, layer.name, filters.shape)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#weights from the second layer</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Index: </span><span class="sc">{</span>idx<span class="sc">}</span><span class="ss">)"</span>, layer.name)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>filters, biases <span class="op">=</span> model.layers[<span class="dv">1</span>].get_weights()</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#weights from the second layer</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#scaling</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>f_min, f_max <span class="op">=</span> filters.<span class="bu">min</span>(), filters.<span class="bu">max</span>()</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>filters <span class="op">=</span> (filters <span class="op">-</span> f_min) <span class="op">/</span> (f_max <span class="op">-</span> f_min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>filters, biases <span class="op">=</span> model.layers[<span class="dv">1</span>].get_weights()</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#scaling</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>f_min, f_max <span class="op">=</span> filters.<span class="bu">min</span>(), filters.<span class="bu">max</span>()</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>filters <span class="op">=</span> (filters <span class="op">-</span> f_min) <span class="op">/</span> (f_max <span class="op">-</span> f_min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Index: 1) block1_conv1 (3, 3, 3, 64)
+<pre><code>Index: 0) input_2
+Index: 1) block1_conv1 (3, 3, 3, 64)
 Index: 2) block1_conv2 (3, 3, 64, 64)
+Index: 3) block1_pool
 Index: 4) block2_conv1 (3, 3, 64, 128)
 Index: 5) block2_conv2 (3, 3, 128, 128)
+Index: 6) block2_pool
 Index: 7) block3_conv1 (3, 3, 128, 256)
 Index: 8) block3_conv2 (3, 3, 256, 256)
 Index: 9) block3_conv3 (3, 3, 256, 256)
+Index: 10) block3_pool
 Index: 11) block4_conv1 (3, 3, 256, 512)
 Index: 12) block4_conv2 (3, 3, 512, 512)
 Index: 13) block4_conv3 (3, 3, 512, 512)
+Index: 14) block4_pool
 Index: 15) block5_conv1 (3, 3, 512, 512)
 Index: 16) block5_conv2 (3, 3, 512, 512)
-Index: 17) block5_conv3 (3, 3, 512, 512)</code></pre>
+Index: 17) block5_conv3 (3, 3, 512, 512)
+Index: 18) block5_pool
+Index: 19) flatten
+Index: 20) fc1
+Index: 21) fc2
+Index: 22) predictions</code></pre>
 </div>
 </div>
+<p>With the explanation of the layers we can look at the layers in this model. First we get an input. Then we have first convolutional layer. From <span class="math inline">\((3, 3, 3, 64)\)</span> we know that we have here <span class="math inline">\(3 \times 3\)</span> filters with <span class="math inline">\(3\)</span> channels (input must be colorful) and the number of these filters is <span class="math inline">\(64\)</span>. After applying these filters on the image <span class="math inline">\((n_{row}, n_{col}, 3)\)</span> we will get “image” with shape <span class="math inline">\((n_{row}', n_{col}', 64)\)</span>.</p>
+<p>In the next layer we will have <span class="math inline">\(3 \times 3\)</span> filters that will need to deal wtth <span class="math inline">\(64\)</span>-layer images. We choose to produce <span class="math inline">\(64\)</span> such filters and so on.</p>
+<p>Other layers in this model that appear often are pooling layers. They just take image as it is and create smaller versions of it by taking for each small part of an image the maximum value (<em>MaxPooling</em>) or average value of the piece (<em>AvgPooling</em>). They don’t change depth or number of dimensions. Only 2D shape of an image <span class="math inline">\((n_{row}', n_{col}') \to (n_{row}'', n_{col}'')\)</span>.</p>
+<p>At the end of the model we are flattening everything to vectors and create fully connected neural nets to produce predictions at the end.</p>
 </section>
 <section id="plot-some-filters" class="level2">
 <h2 class="anchored" data-anchor-id="plot-some-filters">Plot some filters</h2>
-<p>Here are presented some filters.</p>
+<p>We can take the first convolutional layer and take a look at the filters - we have there <span class="math inline">\(64\)</span> filters, each has 3 channels and each of these channels is just <span class="math inline">\(3 \times 3\)</span> grid. We can create “heatmap” of this.</p>
 <div class="cell" data-execution_count="2">
 <details>
 <summary>Code</summary>
@@ -318,7 +336,7 @@ Index: 17) block5_conv3 (3, 3, 512, 512)</code></pre>
 <div class="cell-output cell-output-display">
 <div id="fig-bnwfilters" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="weights_cv_files/figure-html/fig-bnwfilters-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="weights_cv_files/figure-html/fig-bnwfilters-output-1.png" width="656" height="1019" class="figure-img"></p>
 <p></p><figcaption class="figure-caption">Figure&nbsp;1: Every row is a visualized <span class="math inline">\(3 imes 3\)</span> filter with every column being a channel of that filter.</figcaption><p></p>
 </figure>
 </div>
@@ -334,7 +352,7 @@ Index: 17) block5_conv3 (3, 3, 512, 512)</code></pre>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        axs[i, j].imshow(filters[:,:,:, i<span class="op">*</span><span class="dv">5</span> <span class="op">+</span> j])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="weights_cv_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+<p><img src="weights_cv_files/figure-html/cell-4-output-1.png" width="630" height="698"></p>
 </div>
 </div>
 </section>
@@ -343,6 +361,14 @@ Index: 17) block5_conv3 (3, 3, 512, 512)</code></pre>
 </section>
 <section id="useful-links" class="level2">
 <h2 class="anchored" data-anchor-id="useful-links">Useful links</h2>
+<ul>
+<li>Picture of the bird: <a href="https://unsplash.com/photos/3lGi0BXJ1W0?">link</a>utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditShareLink</li>
+<li>Machine Learning Mastery blog post: <a href="https://machinelearningmastery.com/how-to-visualize-filters-and-feature-maps-in-convolutional-neural-networks/">link</a></li>
+<li>Towards Data Science blog post on convolutional layers: <a href="https://towardsdatascience.com/a-comprehensive-guide-to-convolutional-neural-networks-the-eli5-way-3bd2b1164a53">link</a></li>
+<li>Paper from 2013 on understanding convolutional layers: <a href="https://arxiv.org/pdf/1311.2901.pdf">link</a></li>
+<li>Paper from 2015 on deep visualization: <a href="https://yosinski.com/media/papers/Yosinski__2015__ICML_DL__Understanding_Neural_Networks_Through_Deep_Visualization__.pdf">link</a></li>
+<li>Distilled paper from 2020 on visualizing weghts: <a href="https://distill.pub/2020/circuits/visualizing-weights/">link</a></li>
+</ul>
 
 
 </section>

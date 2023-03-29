@@ -2,7 +2,7 @@
 title: "Visualizing CNNs"
 author: "Aleksandra Muciek"
 date: "2023-03-27"
-categories: [ComputerVision, code]
+categories: [ComputerVision, code, python]
 toc: true
 format: 
     html: 
@@ -32,9 +32,11 @@ Filters are introduced to smartly downscale an image while distilling the most i
 
 ![Applying $2 \times 2$ filter to the example above.](applying_filters.png)
 
-While constructing a concloutional layer in the model, we specify the size of a filter ($2 \times 2$, $3 \times 3$ etc.) and we decide on the number of filters we want to apply. In the example above we used only one filter but we could repeat the above process with the second one with different values than $(1, 0),(2, 4)$. In the example above we got output  with dimensions $(3, 3, 1)$. If we chose to apply second filter we would get second result, so overal thing would have dimensions $(3, 3, 2)$. For specified number of filters $k$ we would get $(3, 3, k)$ dimensional tensor. 
+While constructing a concloutional layer in the model, we specify the size of a filter ($2 \times 2$, $3 \times 3$ etc.) and we decide on the number of filters we want to apply. In the example above we used only one filter but we could repeat the above process with the second one with different values than $(1, 0),(2, 4)$. In the example above we got output  with dimensions $(3, 3, 1, 1)$. If we chose to apply second filter we would get second result, so overal thing would have dimensions $(3, 3, 1, 2)$. For specified number of filters $k$ we would get $(3, 3, 1, k)$ dimensional tensor. 
 
 Values of the filters are not specified by us before training - they are learned by the model. These are the things we may want ti visualize later to see how the model behaves.
+
+If we take colorful image as input, with size $(n_{row}, n_{col}, 3)$, we construct filters that also have $3$ channels - for example with size $(2, 2, 3)$. Each of the channels of the filter will be applied to the corresponding channel of a picture, the elementwise product will be calculated for each channel separately, as above. Then, before putting it all to the result matrix, the values will be summed together. We then would get flat $(n_{row}', n_{col}', 1)$ output. As before, we are not only applying one filter on the image - we can to this with many filters ($k$), so all of them will be stored as, for example $(2, 2, 3, k)$. And we will get output for each filter, so overal size will be  $(n_{row}', n_{col}', k)$
 
 ## Get convolutional model
 
@@ -53,6 +55,8 @@ for idx, layer in enumerate(model.layers):
     if 'conv' in layer.name:
         filters, biases = layer.get_weights()
         print(f"Index: {idx})", layer.name, filters.shape)
+    else:
+        print(f"Index: {idx})", layer.name)
 
 #weights from the second layer
 
@@ -63,9 +67,18 @@ f_min, f_max = filters.min(), filters.max()
 filters = (filters - f_min) / (f_max - f_min)
 ```
 
+With the explanation of the layers we can look at the layers in this model. First we get an input. Then we have first convolutional layer. From $(3, 3, 3, 64)$ we know that we have here $3 \times 3$ filters with $3$ channels (input must be colorful) and the number of these filters is $64$. After applying these filters on the image $(n_{row}, n_{col}, 3)$ we will get "image" with shape $(n_{row}', n_{col}', 64)$. 
+
+In the next layer we will have $3 \times 3$ filters that will need to deal wtth $64$-layer images. We choose to produce $64$ such filters and so on.
+
+Other layers in this model that appear often are pooling layers. They just take image as it is and create smaller versions of it by taking for each small part of an image the maximum value (*MaxPooling*) or average value of the piece (*AvgPooling*). They don't change depth or number of dimensions. Only 2D shape of an image $(n_{row}', n_{col}') \to (n_{row}'', n_{col}'')$.
+
+
+At the end of the model we are flattening everything to vectors and create fully connected neural nets to produce predictions at the end.
+
 ## Plot some filters
 
-Here are presented some filters.
+We can take the first convolutional layer and take a look at the filters - we have there $64$ filters, each has 3 channels and each of these channels is just $3 \times 3$ grid. We can create "heatmap" of this.
 
 ```{python}
 #| label: fig-bnwfilters
@@ -100,4 +113,13 @@ for i in range(5):
 
 ```
 
-## Useful links 
+## Useful links
+
+- Picture of the bird: [link](https://unsplash.com/photos/3lGi0BXJ1W0?)utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink
+- Machine Learning Mastery blog post: [link](https://machinelearningmastery.com/how-to-visualize-filters-and-feature-maps-in-convolutional-neural-networks/)
+- Towards Data Science blog post on convolutional layers: [link](https://towardsdatascience.com/a-comprehensive-guide-to-convolutional-neural-networks-the-eli5-way-3bd2b1164a53)
+- Paper from 2013 on understanding convolutional layers: [link](https://arxiv.org/pdf/1311.2901.pdf)
+- Paper from 2015 on deep visualization: [link](https://yosinski.com/media/papers/Yosinski__2015__ICML_DL__Understanding_Neural_Networks_Through_Deep_Visualization__.pdf)
+- Distilled paper from 2020 on visualizing weghts: [link](https://distill.pub/2020/circuits/visualizing-weights/)
+
+
