@@ -213,7 +213,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#get-convolutional-model" id="toc-get-convolutional-model" class="nav-link" data-scroll-target="#get-convolutional-model">Get convolutional model</a></li>
   <li><a href="#plot-some-filters" id="toc-plot-some-filters" class="nav-link" data-scroll-target="#plot-some-filters">Plot some filters</a></li>
-  <li><a href="#additional-section-to-play-with-widgets" id="toc-additional-section-to-play-with-widgets" class="nav-link" data-scroll-target="#additional-section-to-play-with-widgets">Additional section to play with widgets</a></li>
+  <li><a href="#plot-picture-after-applying-filters" id="toc-plot-picture-after-applying-filters" class="nav-link" data-scroll-target="#plot-picture-after-applying-filters">Plot picture after applying filters</a></li>
   <li><a href="#useful-links" id="toc-useful-links" class="nav-link" data-scroll-target="#useful-links">Useful links</a></li>
   </ul>
 </nav>
@@ -286,7 +286,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>filters <span class="op">=</span> (filters <span class="op">-</span> f_min) <span class="op">/</span> (f_max <span class="op">-</span> f_min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Index: 0) input_2
+<pre><code>Index: 0) input_3
 Index: 1) block1_conv1 (3, 3, 3, 64)
 Index: 2) block1_conv2 (3, 3, 64, 64)
 Index: 3) block1_pool
@@ -337,11 +337,12 @@ Index: 22) predictions</code></pre>
 <div id="fig-bnwfilters" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="weights_cv_files/figure-html/fig-bnwfilters-output-1.png" width="656" height="1019" class="figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Every row is a visualized <span class="math inline">\(3 imes 3\)</span> filter with every column being a channel of that filter.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Every row is a visualized 3 x 3 filter with every column being a channel of that filter.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
+<p>Since in this layer every filter has three channels (each corresponding to a channel of a picture), we can in this case plot them as RGB figures.</p>
 <div class="cell" data-execution_count="3">
 <details>
 <summary>Code</summary>
@@ -352,17 +353,67 @@ Index: 22) predictions</code></pre>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        axs[i, j].imshow(filters[:,:,:, i<span class="op">*</span><span class="dv">5</span> <span class="op">+</span> j])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="weights_cv_files/figure-html/cell-4-output-1.png" width="630" height="698"></p>
+<div id="fig-rgbfilters" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="weights_cv_files/figure-html/fig-rgbfilters-output-1.png" width="630" height="698" class="figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: Filters with all 3 channels displayed as RGB pictures.</figcaption><p></p>
+</figure>
 </div>
 </div>
+</div>
+<p>This may look nice but I don’t think it is very informative. We can use the filters to transform a real picture and see the results.</p>
 </section>
-<section id="additional-section-to-play-with-widgets" class="level2">
-<h2 class="anchored" data-anchor-id="additional-section-to-play-with-widgets">Additional section to play with widgets</h2>
+<section id="plot-picture-after-applying-filters" class="level2">
+<h2 class="anchored" data-anchor-id="plot-picture-after-applying-filters">Plot picture after applying filters</h2>
+<p>We can take a royalty free picture of a bird and put it through the first convolutional layer of the model.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="bird.jpg" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Royalty free bird</figcaption><p></p>
+</figure>
+</div>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> keras.applications.vgg16 <span class="im">import</span> preprocess_input</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.utils <span class="im">import</span> load_img <span class="co">#keras.preprocessing.image is depricated</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.utils <span class="im">import</span> img_to_array</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> keras.models <span class="im">import</span> Model</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>model_one_layer <span class="op">=</span> Model(inputs<span class="op">=</span>model.inputs, outputs<span class="op">=</span>model.layers[<span class="dv">1</span>].output)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> load_img(<span class="st">'bird.jpg'</span>, target_size<span class="op">=</span>(<span class="dv">224</span>, <span class="dv">224</span>))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#image to array</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> img_to_array(img)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> np.expand_dims(img, axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#(num_samples, n_rows, n_cols, channels)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> preprocess_input(img)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>feature_maps <span class="op">=</span> model_one_layer.predict(img)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>square <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(square, square, sharey<span class="op">=</span><span class="va">True</span>, figsize <span class="op">=</span> (<span class="dv">8</span>,<span class="dv">8</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Image treated with filters"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(square):</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(square):</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        axs[i, j].imshow(feature_maps[<span class="dv">0</span>,:,:, i<span class="op">*</span>square <span class="op">+</span> j], cmap <span class="op">=</span> <span class="st">'gray'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="weights_cv_files/figure-html/cell-6-output-1.png" width="649" height="698"></p>
+</div>
+</div>
 </section>
 <section id="useful-links" class="level2">
 <h2 class="anchored" data-anchor-id="useful-links">Useful links</h2>
 <ul>
-<li>Picture of the bird: <a href="https://unsplash.com/photos/3lGi0BXJ1W0?">link</a>utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditShareLink</li>
+<li>Picture of the bird: <a href="https://unsplash.com/photos/3lGi0BXJ1W0?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditShareLink">link</a></li>
 <li>Machine Learning Mastery blog post: <a href="https://machinelearningmastery.com/how-to-visualize-filters-and-feature-maps-in-convolutional-neural-networks/">link</a></li>
 <li>Towards Data Science blog post on convolutional layers: <a href="https://towardsdatascience.com/a-comprehensive-guide-to-convolutional-neural-networks-the-eli5-way-3bd2b1164a53">link</a></li>
 <li>Paper from 2013 on understanding convolutional layers: <a href="https://arxiv.org/pdf/1311.2901.pdf">link</a></li>

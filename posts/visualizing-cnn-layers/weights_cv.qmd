@@ -82,7 +82,7 @@ We can take the first convolutional layer and take a look at the filters - we ha
 
 ```{python}
 #| label: fig-bnwfilters
-#| fig-cap: "Every row is a visualized $3 \times 3$ filter with every column being a channel of that filter. "
+#| fig-cap: "Every row is a visualized 3 x 3 filter with every column being a channel of that filter. "
 import matplotlib.pyplot as plt
 
 num_filters = 4
@@ -95,10 +95,11 @@ for i in range(num_filters):
         axs[i,j].imshow(filter_0[:,:, j], cmap='gray')
 ```
 
-
+Since in this layer every filter has three channels (each corresponding to a channel of a picture), we can in this case plot them as RGB figures.
 
 ```{python}
-
+#| label: fig-rgbfilters
+#| fig-cap: "Filters with all 3 channels displayed as RGB pictures."
 fig, axs = plt.subplots(5, 5, sharey=True, figsize = (8,8))
 fig.suptitle("Filters with all 3 channels")
 for i in range(5):
@@ -107,15 +108,51 @@ for i in range(5):
 
 ```
 
-## Additional section to play with widgets
+This may look nice but I don't think it is very informative. We can use the filters to transform a real picture and see the results.
+
+## Plot picture after applying filters
+
+We can take a royalty free picture of a bird and put it through the first convolutional layer of the model.
+
+![Royalty free bird](bird.jpg)
+
+```{python}
+#| output: false
+from keras.applications.vgg16 import preprocess_input
+from tensorflow.keras.utils import load_img #keras.preprocessing.image is depricated
+from tensorflow.keras.utils import img_to_array
+from keras.models import Model
+
+model_one_layer = Model(inputs=model.inputs, outputs=model.layers[1].output)
+img = load_img('bird.jpg', target_size=(224, 224))
+
+#image to array
+img = img_to_array(img)
+img = np.expand_dims(img, axis=0)
+#(num_samples, n_rows, n_cols, channels)
+
+img = preprocess_input(img)
+
+feature_maps = model_one_layer.predict(img)
+```
 
 ```{python}
 
+square = 5
+
+fig, axs = plt.subplots(square, square, sharey=True, figsize = (8,8))
+fig.suptitle("Image treated with filters")
+
+for i in range(square):
+    for j in range(square):
+        axs[i, j].imshow(feature_maps[0,:,:, i*square + j], cmap = 'gray')
+
 ```
+
 
 ## Useful links
 
-- Picture of the bird: [link](https://unsplash.com/photos/3lGi0BXJ1W0?)utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink
+- Picture of the bird: [link](https://unsplash.com/photos/3lGi0BXJ1W0?utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink)
 - Machine Learning Mastery blog post: [link](https://machinelearningmastery.com/how-to-visualize-filters-and-feature-maps-in-convolutional-neural-networks/)
 - Towards Data Science blog post on convolutional layers: [link](https://towardsdatascience.com/a-comprehensive-guide-to-convolutional-neural-networks-the-eli5-way-3bd2b1164a53)
 - Paper from 2013 on understanding convolutional layers: [link](https://arxiv.org/pdf/1311.2901.pdf)
