@@ -2,6 +2,8 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/copula/index.html",
+      "/posts/zbieznosci/weights_cv.html",
       "/posts/visualizing-cnn-layers/weights_cv.html",
       "/posts/welcome/index.html"
     ]

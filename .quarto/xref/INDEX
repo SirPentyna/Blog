@@ -25,5 +25,11 @@
   },
   "posts/welcome/index.qmd": {
     "index.html": "7c053b80"
+  },
+  "posts/zbieznosci/weights_cv.qmd": {
+    "weights_cv.html": "e07ee38d"
+  },
+  "posts/copula/index.qmd": {
+    "index.html": "d15d1f46"
   }
 }

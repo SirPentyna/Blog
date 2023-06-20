@@ -1,0 +1,63 @@
+---
+title: "Zbieżności rozkładów"
+author: "Aleksandra Muciek"
+date: "2023-04-19"
+categories: [probability, theory, polish, mathematics]
+toc: true
+format: 
+    html: 
+        code-fold: true
+---
+
+
+
+W tym artykule postaram się przedstawić różne rodzaje zbieżności, jakie występują w rachunku prawdopodobieństwa. Ponieważ sama często mam z nimi problem, może taki post będzie pomocny też dla innych adeptów probabilistyki.
+
+## Rodzaje zbieżności
+
+Definiujemy różne rodzaje zbieżności. Mówimy, że ciąg zmiennych losowych $(X_n)_{n=1}^\infty$ jest zbieżny do zmiennej losowej $X$:
+
+### Prawie na pewno
+
+*prawie na pewno*, jeśli
+
+$$
+P({\omega: \lim_n X_n(\omega) = X(\omega)}) = 1
+$$
+
+czyli kiedy miara zbioru na którym $\lim_n X_n(\omega) = X(\omega)$ wynosi 1, czyli różnią się na zbiorach miary zero. Odpowiada to zbieżności z teorii miary *prawie wszędzie*, gdzie zbieżność prawie wszędzie definiowana jest jako
+
+Ciąg $(f_n)$ zbiega do funkcji $f$ prawie wszędzie względem miary $\mu$, gdy istnieje zbiór mierzalny $E \in \mathcal{F}$, taki że
+- $\mu(E^c) = 0$
+- $\lim_n f_n(x) = x$ dla każdego $x \in E$.
+
+### Według prawdopodobieństwa
+
+*według prawdopodobieństwa*, jeśli dla każdego $\epsilon > 0$
+
+$$
+lim_n P(|X_n - X| > \epsilon) = 0
+$$
+
+czyli w granicy prawdopodobieństwo że się od siebie chociaż trochę różnią jest zerowe. Odpowiada to zbieżności według miary.
+
+### Według p-tego momentu (w $L^p$)
+
+gdzie $0 < p < \infty$, jeśli $\mathbb{E}|X|^p < \infty$ i $\mathbb{E}|X_n|^p < \infty$ dla kolejnych $n =1, 2, 3, ...$
+
+$$
+\mathbb{E} |X_n - X|^p = 0
+$$
+co odpowiada zbieżności w $L^p$.
+
+### Zbieżność według rozkładu
+
+## Zbieżność prawie na pewno - twierdzenia
+
+### O X i Y
+
+Jeżeli $X_n \to^{pn} X$ oraz $Y_n \to^{pn} Y$, to
+1 Dla dowolnych $a, b \in \mathbb{R}$ zachodzi $aX_n + bY_n \to aX + bY$
+
+Dowód:
+Weźmy dowolne $a, b \in \mathbb{R}$. Wiemy, że $P({\omega: \lim_n X_n(\omega) = X(\omega)}) = 1$ i $P({\omega: \lim_n Y_n(\omega) = Y(\omega)}) = 1$

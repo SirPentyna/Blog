@@ -11,7 +11,49 @@
     "href": "index.html",
     "title": "Up to Data",
     "section": "",
-    "text": "Visualizing CNNs\n\n\n\n\n\n\n\nComputerVision\n\n\ncode\n\n\npython\n\n\n\n\n\n\n\n\n\n\n\nMar 27, 2023\n\n\nAleksandra Muciek\n\n\n\n\n\n\n  \n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nMar 24, 2023\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+    "text": "Copula\n\n\n\n\n\n\n\nMath\n\n\ntheory\n\n\n\n\n\n\n\n\n\n\n\nJun 20, 2023\n\n\nAleksandra Muciek\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nZbieżności rozkładów\n\n\n\n\n\n\n\nprobability\n\n\ntheory\n\n\npolish\n\n\nmathematics\n\n\n\n\n\n\n\n\n\n\n\nApr 19, 2023\n\n\nAleksandra Muciek\n\n\n\n\n\n\n  \n\n\n\n\nVisualizing CNNs\n\n\n\n\n\n\n\nComputerVision\n\n\ncode\n\n\npython\n\n\n\n\n\n\n\n\n\n\n\nMar 27, 2023\n\n\nAleksandra Muciek\n\n\n\n\n\n\n  \n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nMar 24, 2023\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/copula/index.html",
+    "href": "posts/copula/index.html",
+    "title": "Copula",
+    "section": "",
+    "text": "What are copulas? Why do we need them? How do we use them?"
+  },
+  {
+    "objectID": "posts/copula/index.html#copulae---what-are-they",
+    "href": "posts/copula/index.html#copulae---what-are-they",
+    "title": "Copula",
+    "section": "Copulae - what are they?",
+    "text": "Copulae - what are they?\nCopulae came from the need of modeling relations between random variables.\nAssume we have random variables \\(X\\) and \\(Y\\) with distributions \\(F_X\\) and \\(F_Y\\). If they are independent, their joint distribution is given as \\(F_{X,Y}(x, y) = F_X(x)F_Y(y)\\). But what if they are not independent? There are numerous ways the variables could influence each other.\nHere comes Copula.\nEvery cumulative distribution function with uniform marginals on \\(U[0,1]\\) is called copula. Why is this is useful? Because we know that \\(F_X(X)\\) is uniformly distributed on \\([0,1]\\). With random variables \\(X\\), \\(Y\\) we can go to uniform random variables by \\(F_X(X)\\), \\(F_Y(Y)\\) and explore their dependance there, on \\([0, 1] \\times [0,1]\\)."
+  },
+  {
+    "objectID": "posts/copula/index.html#existence",
+    "href": "posts/copula/index.html#existence",
+    "title": "Copula",
+    "section": "Existence",
+    "text": "Existence\nCan we do that trick for any pair of \\(X\\) and \\(Y\\)? It turns out that yes.\nSklar theorem\n\nTheorem 1 (Sklar) If \\(F_{(X,Y)}\\) is a cdf function of random variables \\((X, Y)\\) with continuous marginal cdfs \\(F_X\\) and \\(F_Y\\), there exists unique Copula such that\n\\[\nF_{(X, Y)}(x, y) = C_{(X,Y)}(F_X(x), F_Y(y))\n\\]\n\n\nProof. Take \\[\nC_(X, Y)(x, y) := P[F_X(X) \\leq x, F_Y(Y) \\leq y],\n\\] then \\[\nC_(X, Y)(x, y) = F_{(X,Y)} (F^{-1}_X(x), F^{-1}_Y(y)).\n\\]"
+  },
+  {
+    "objectID": "posts/copula/index.html#examples",
+    "href": "posts/copula/index.html#examples",
+    "title": "Copula",
+    "section": "Examples",
+    "text": "Examples\nImportant examples:\n\nIndependent \\(X\\) and \\(Y\\) \\[\nC^{*} (x, y) = \\min (1, x) \\min (1, y) I_{(0, \\infty) \\times (0, \\infty)} (x, y)\n\\]\n\n\n\nCode\nimport numpy as np\nimport matplotlib.pyplot as plt\n\ndef plot_copula(copula_function, copula_name):\n    x = np.linspace(0, 1, 30)\n    y = np.linspace(0, 1, 30)\n    X, Y = np.meshgrid(x, y)\n    Z = copula_function(X, Y)\n\n\n    fig = plt.figure()\n    ax = plt.axes(projection='3d')\n    ax.contour3D(X, Y, Z, 50) #, cmap='binary')\n    ax.set_xlabel('x')\n    ax.set_ylabel('y')\n    ax.set_title(copula_name)\n    #ax.set_zlabel('Copula')\n\ndef c_star(x, y):\n    return np.minimum([1], x) * np.minimum([1],y)\n\n\nplot_copula(c_star, \"C*\")\n\n\n\n\n\n\nCopula plus \\(C^{+}\\) This corresponds to maximal dependence between two variables. \\[\nC^{+} = \\min( \\min(1, x), \\min(1, y)) I_{(0, \\infty) \\times (0, \\infty)} (x, y)\n\\]\n\n\n\nCode\ndef c_plus(x, y):\n    return np.minimum(np.minimum([1], x), np.minimum([1],y))\n\n\nplot_copula(c_plus, \"C+\")\n\n\n\n\n\n\nCopula minus \\(C^{-}\\). This corresponds to maximal negative dependence between two variables. \\[\nC^{-} = max(0, min(1, x) + min (1, y) - 1) I_{(0, \\infty) \\times (0, \\infty)} (x, y)\n\\]\n\n\n\nCode\ndef c_minus(x, y):\n    return np.maximum(0, np.minimum([1], x) + np.minimum([1],y) - 1)\n\n\nplot_copula(c_minus, \"C-\")"
+  },
+  {
+    "objectID": "posts/copula/index.html#properties",
+    "href": "posts/copula/index.html#properties",
+    "title": "Copula",
+    "section": "Properties",
+    "text": "Properties\nThe copulae plus and minus bound every other copula:\n\nTheorem 2 (Frechet) For any copula\n\\[\nC^{-} (x, y) \\leq C(x, y) \\leq C^{-} (x, y), \\forall x, y \\in \\mathbb{R}\n\\]\n\nAs every density, copulae have properties:\n\n\\(C: \\mathbb{R}^2 \\to [0,1]\\) is nondecreasing on every dimension\n\\(C(-\\infty, -\\infty) = 0\\) and \\(C(\\infty, \\infty) = 1\\), while iterating the limits in any order.\n\\(C\\) satisfies\n\n\\[\nC(\\min(\\mathbf{x},\\mathbf{y})) + C(\\max(\\mathbf{x},\\mathbf{y})) \\geq C(\\mathbf{x}) + C(\\mathbf{y}).\n\\]"
+  },
+  {
+    "objectID": "posts/copula/index.html#sources",
+    "href": "posts/copula/index.html#sources",
+    "title": "Copula",
+    "section": "Sources:",
+    "text": "Sources:\n\nhttps://en.wikipedia.org/wiki/Copula_(probability_theory)#Sklar’s_theorem\nhttp://www.math.uni.wroc.pl/~szekli/documents/mumio/mumio-16-trans/skrypt-16.pdf\nhttps://jakevdp.github.io/PythonDataScienceHandbook/04.12-three-dimensional-plotting.html"
   },
   {
     "objectID": "posts/visualizing-cnn-layers/weights_cv.html",
@@ -61,5 +103,26 @@
     "title": "Welcome To My Blog",
     "section": "",
     "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "posts/zbieznosci/weights_cv.html",
+    "href": "posts/zbieznosci/weights_cv.html",
+    "title": "Zbieżności rozkładów",
+    "section": "",
+    "text": "W tym artykule postaram się przedstawić różne rodzaje zbieżności, jakie występują w rachunku prawdopodobieństwa. Ponieważ sama często mam z nimi problem, może taki post będzie pomocny też dla innych adeptów probabilistyki."
+  },
+  {
+    "objectID": "posts/zbieznosci/weights_cv.html#rodzaje-zbieżności",
+    "href": "posts/zbieznosci/weights_cv.html#rodzaje-zbieżności",
+    "title": "Zbieżności rozkładów",
+    "section": "Rodzaje zbieżności",
+    "text": "Rodzaje zbieżności\nDefiniujemy różne rodzaje zbieżności. Mówimy, że ciąg zmiennych losowych \\((X_n)_{n=1}^\\infty\\) jest zbieżny do zmiennej losowej \\(X\\):\n\nPrawie na pewno\nprawie na pewno, jeśli\n\\[\nP({\\omega: \\lim_n X_n(\\omega) = X(\\omega)}) = 1\n\\]\nczyli kiedy miara zbioru na którym \\(\\lim_n X_n(\\omega) = X(\\omega)\\) wynosi 1, czyli różnią się na zbiorach miary zero. Odpowiada to zbieżności z teorii miary prawie wszędzie, gdzie zbieżność prawie wszędzie definiowana jest jako\nCiąg \\((f_n)\\) zbiega do funkcji \\(f\\) prawie wszędzie względem miary \\(\\mu\\), gdy istnieje zbiór mierzalny \\(E \\in \\mathcal{F}\\), taki że - \\(\\mu(E^c) = 0\\) - \\(\\lim_n f_n(x) = x\\) dla każdego \\(x \\in E\\).\n\n\nWedług prawdopodobieństwa\nwedług prawdopodobieństwa, jeśli dla każdego \\(\\epsilon > 0\\)\n\\[\nlim_n P(|X_n - X| > \\epsilon) = 0\n\\]\nczyli w granicy prawdopodobieństwo że się od siebie chociaż trochę różnią jest zerowe. Odpowiada to zbieżności według miary.\n\n\nWedług p-tego momentu (w \\(L^p\\))\ngdzie \\(0 < p < \\infty\\), jeśli \\(\\mathbb{E}|X|^p < \\infty\\) i \\(\\mathbb{E}|X_n|^p < \\infty\\) dla kolejnych \\(n =1, 2, 3, ...\\)\n\\[\n\\mathbb{E} |X_n - X|^p = 0\n\\] co odpowiada zbieżności w \\(L^p\\).\n\n\nZbieżność według rozkładu"
+  },
+  {
+    "objectID": "posts/zbieznosci/weights_cv.html#zbieżność-prawie-na-pewno---twierdzenia",
+    "href": "posts/zbieznosci/weights_cv.html#zbieżność-prawie-na-pewno---twierdzenia",
+    "title": "Zbieżności rozkładów",
+    "section": "Zbieżność prawie na pewno - twierdzenia",
+    "text": "Zbieżność prawie na pewno - twierdzenia\n\nO X i Y\nJeżeli \\(X_n \\to^{pn} X\\) oraz \\(Y_n \\to^{pn} Y\\), to 1 Dla dowolnych \\(a, b \\in \\mathbb{R}\\) zachodzi \\(aX_n + bY_n \\to aX + bY\\)\nDowód: Weźmy dowolne \\(a, b \\in \\mathbb{R}\\). Wiemy, że \\(P({\\omega: \\lim_n X_n(\\omega) = X(\\omega)}) = 1\\) i \\(P({\\omega: \\lim_n Y_n(\\omega) = Y(\\omega)}) = 1\\)"
   }
 ]

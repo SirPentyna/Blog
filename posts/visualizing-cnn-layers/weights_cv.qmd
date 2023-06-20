@@ -149,6 +149,13 @@ for i in range(square):
 
 ```
 
+## Visualizing the same thing over multiple convolutional blocks
+
+## Visualization with a Deconvnet
+
+Here I will try to explore approach shown in paper "Visualizing and Understanding Convolutional Networks".
+
+The approach is based on Deconvnet - which is basically reversed operations of convolutional network. It maps features to inputs, not inputs to features.
 
 ## Useful links
 
